@@ -10,15 +10,26 @@ class GameLife
     ~GameLife();//destructor
 
     //void push(char d);
-    void readFile();
+    int readFile(string fileName);
+    int ClassicMode();
+    //int ClassicModeRepeat();
+    int DoughNutMode();
+    int MirrorMode();
+    int getLineLength(string fileName);
+    int printGen0();
+    int RandomGrid(int dim1, int dim2, double density);
     //char peek();//aka top()
-
-    int getSize();
-    bool isEmpty();
-    bool isFull();
 
     char ch;
     int countChar;
-
-    char *myArray;
+    string fileName;
+    string line;
+    int lineLength;
+    int numberRows;
+    int numNeighbors;
+    int charCounter;
+    int generationCount;
+    char classicArray[];
+    //char classicArray[countChar] = { '\0' };
+    //char *myArray;
 };
