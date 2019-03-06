@@ -1,4 +1,3 @@
-//#include "GameLife.h"
 #include "GameLife.cpp"
 #include <iostream>
 
@@ -112,12 +111,5 @@ int main (int argc, char **argv)
     game.printGen0(printControl);
     game.MirrorMode(printControl, outputFileName);
   }
-
-  // = argv[1]; //Takes in a user command line argument and
-                              // uses it for the name of the file for reading.
-
-
-
-
   return 0;
 };
