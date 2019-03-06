@@ -7,16 +7,15 @@ class GameLife
   public:
     GameLife();//constructor
     GameLife(int maxSize);//overloaded constructor
-    ~GameLife();//destructor
 
     //void push(char d);
     int readFile(string fileName);
-    int ClassicMode();
+    int ClassicMode(string printControl, string outputFileName);
     //int ClassicModeRepeat();
-    int DoughNutMode();
-    int MirrorMode();
+    int DoughNutMode(string printControl, string outputFileName);
+    int MirrorMode(string printControl, string outputFileName);
     int getLineLength(string fileName);
-    int printGen0();
+    int printGen0(string printControl);
     int RandomGrid(int dim1, int dim2, double density);
     //char peek();//aka top()
 

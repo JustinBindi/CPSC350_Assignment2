@@ -1,74 +1,65 @@
 #include "GameLife.h"
 #include <iostream>
-#include <fstream> //Using this for reading and writing files.
+#include <fstream>
 #include <vector>
-#include <algorithm> //
+#include <algorithm>
 #include <string>
+#include <unistd.h>
 
 using namespace std;
 vector<char> vectorGrid;
 int generationCount = 0;
+string output;
 
 GameLife::GameLife()//default constructor
 {
-  //initialize variabble to default values
-  //myvectorGrid = new char[256];
   ch = '\0';
   countChar = 0;
   fileName = "";
   generationCount = 0;
-}
+};
 
 GameLife::GameLife(int maxSize)//overloaded constructor
 {
-  //myvectorGrid = new char[maxSize];
   ch = '\0';
   countChar = 0;
   fileName = "";
   generationCount = 0;
-}
+};
 
-GameLife::~GameLife()//destructor
-{}
-
+//Gets the length of a row in the first generation.
 int GameLife::getLineLength(string fileName)
 {
   lineLength = 0;
-  ifstream myFileLength (fileName); //Makes the file "fileName" available for reading.
-  while(myFileLength.get(ch)) //A while function that continues on the end of file.
+  ifstream myFileLength (fileName);
+  while(myFileLength.get(ch))
   {
-    //getline(myFile, line); //Reads the file line by line.
     if (ch == '-' || ch == 'X' || ch == 'x')
     {
-      getline(myFileLength, line); //Reads the file's first line.
-      //cout << line << endl;
-      lineLength = line.length()+1; //Set a value of lineLength to the line's length.
+      getline(myFileLength, line);
+      lineLength = line.length()+1;
     }
   }
   myFileLength.close();
-  //cout << lineLength << endl;
   return lineLength;
-}
+};
 
+//Reads the first generation into a vector.
 int GameLife::readFile(string fileName)
 {
   countChar = 0;
   vectorGrid.clear();
 
-  ifstream myFile (fileName); //Makes the file "fileName" available for reading.
+  ifstream myFile (fileName);
 
-  while(myFile.get(ch)) //A while function that continues on the end of file.
+  while(myFile.get(ch))
   {
-    //getline(myFile, line); //Reads the file line by line.
     if (ch == '-' || ch == 'X' || ch == 'x')
     {
       countChar++;
-      //cout << countChar << endl;
-      //cout << ch << endl;
-      //cout << "" << endl;
       vectorGrid.push_back(ch);
     }
-  }//cout << vectorGrid << endl;
+  }
   for (int i = 0; i < lineLength; i++)
   {
     vectorGrid.insert(vectorGrid.begin(),'~');
@@ -83,49 +74,86 @@ int GameLife::readFile(string fileName)
     countChar+=2;
   }
 
-  /*numberRows = countChar/lineLength;
-  countChar+=numberRows*2;*/
-
   vectorGrid.insert(vectorGrid.begin(),'~');
   vectorGrid.push_back('~');
   countChar+=2;
-      /*for (vector<char>::const_iterator i = vectorGrid.begin(); i != vectorGrid.end(); ++i)
-      {
-        cout << *i << ' ';
-      }
-      cout << '\0' << endl;*/
-myFile.close();
-
+  myFile.close();
   return 0;
-}
+};
 
-int GameLife::printGen0()
+//Prints the first generation to one of the three mediums depending on user input.
+int GameLife::printGen0(string printControl)
 {
   char* array = &vectorGrid[0];
   charCounter = 0;
-  //classicFile << "" << endl;
-  cout << "" << endl;
-  cout << "Generation 0:" << endl;
-  for (int i = 0; i < countChar+1; i++) //For each item in the array.
+  if (printControl == "E" || printControl == "e")
   {
-    if (charCounter == lineLength)
+    cin.ignore();
+    cout << "" << endl;
+    cout << "Generation 0:" << endl;
+    for (int i = 0; i < countChar+1; i++)
     {
-      //classicFile << "" << endl;
-      cout << "" << endl;
-      charCounter = 0;
+      if (charCounter == lineLength)
+      {
+        cout << "" << endl;
+        charCounter = 0;
+      }
+
+      if (array[i] == 'X' || array[i] == 'x' || array[i] == '-')
+      {
+        charCounter++;
+        cout << array[i] << '\0';
+
+      }
     }
+    cin.ignore();
+  }
 
-    if (array[i] == 'X' || array[i] == 'x' || array[i] == '-')
+  if (printControl == "F" || printControl == "f")
+  {
+    output = "";
+    output += "Generation 0:";
+    output += "\n";
+    for (int i = 0; i < countChar+1; i++)
     {
-      //classicFile << array[i] << '\0';
-      charCounter++;
-      cout << array[i] << '\0';
+      if (charCounter == lineLength)
+      {
+        output += "\n";
+        charCounter = 0;
+      }
 
+      if (array[i] == 'X' || array[i] == 'x' || array[i] == '-')
+      {
+        charCounter++;
+        output += array[i];
+
+      }
     }
   }
-  return 0;
-}
+  if (printControl == "P" || printControl == "p")
+  {
+    cout << "" << endl;
+    cout << "Generation 0:" << endl;
+    for (int i = 0; i < countChar+1; i++)
+    {
+      if (charCounter == lineLength)
+      {
+        cout << "" << endl;
+        charCounter = 0;
+      }
 
+      if (array[i] == 'X' || array[i] == 'x' || array[i] == '-')
+      {
+        charCounter++;
+        cout << array[i] << '\0';
+      }
+    }
+    sleep(2);
+  }
+  return 0;
+};
+
+//Creates a random generation zero with user inputed dimensions and density.
 int GameLife::RandomGrid(int dim1, int dim2, double density)
 {
   int randomTotal = dim1*dim2;
@@ -143,18 +171,16 @@ int GameLife::RandomGrid(int dim1, int dim2, double density)
   }
   random_shuffle(randomStr.begin(), randomStr.end());
 
-  if (randomFile.is_open()) //If the new file created is open.
+  if (randomFile.is_open())
   {
     charCounter = 0;
-    //classicFile << "" << endl;
     randomFile << dim1 << '\n';
     randomFile << dim2 << '\n';
-    for (int i = 0; i < randomStr.length(); i++) //For each item in the array.
+    for (int i = 0; i < randomStr.length(); i++)
     {
       if (charCounter == dim2)
       {
         randomFile << "" << endl;
-        //cout << "" << endl;
         charCounter = 0;
       }
 
@@ -164,18 +190,19 @@ int GameLife::RandomGrid(int dim1, int dim2, double density)
   }
   randomFile.flush();
   randomFile.close();
-  //cout << randomStr << endl;
-}
+  return 0;
+};
 
-int GameLife::ClassicMode()
+//Runs classic boundary mode for each of the three mediums depending on user input.
+int GameLife::ClassicMode(string printControl, string outputFileName)
 {
   generationCount++;
-  ofstream classicFile ("classicMode.txt"); //Writes to/creates new file named
-                                         // classicMode.txt.
+  ofstream classicFile ("classicMode.txt");
+
   char* array = &vectorGrid[0];
   char classicArray[countChar] = { '\0' };
 
-  for (int i = 0; i < countChar; i++) //For each item in the array.
+  for (int i = 0; i < countChar; i++)
   {
     numNeighbors = 0;
 
@@ -270,189 +297,142 @@ int GameLife::ClassicMode()
     {
       classicArray[i] = '~';
     }
-
-    //cout << array[i] << ' ';
-    //cout << "neighbors: " << numNeighbors << endl;
   }
-
-  /*for (int i = 0; i < countChar+1; i++) //For each item in the array.
-  {
-    cout << classicArray[i] << ' ';
-  }
-  cout << "" << endl;*/
 
   string strArray = array;
   string strClassicArray = classicArray;
 
-  //cout << strArray << endl;
-  //cout << strClassicArray << endl;
-
-  if (strArray == strClassicArray)
+  if (printControl == "E" || printControl == "e")
   {
-    cout << "The simulation is now stable. Please press 'enter'/'return' to exit." << endl;
+    if (strArray == strClassicArray)
+    {
+      cout << "The simulation is now stable. Please press 'enter'/'return' to exit." << endl;
+      cin.ignore();
+      return 0;
+    }
+    if (classicFile.is_open())
+    {
+      charCounter = 0;
+      cout << "" << endl;
+      cout << "Generation " << generationCount << ":" << endl;
+      for (int i = 0; i < countChar+1; i++)
+      {
+        if (charCounter == lineLength)
+        {
+          classicFile << "" << endl;
+          cout << "" << endl;
+          charCounter = 0;
+        }
+
+        if (classicArray[i] == 'X' || classicArray[i] == 'x' || classicArray[i] == '-')
+        {
+          charCounter++;
+          classicFile << classicArray[i] << '\0';
+          cout << classicArray[i] << '\0';
+        }
+      }
+    }
     cin.ignore();
-    return 0;
+    classicFile.flush();
+    classicFile.close();
+    readFile("classicMode.txt");
+    ClassicMode(printControl, outputFileName);
   }
-  if (classicFile.is_open()) //If the new file created is open.
+
+  if (printControl == "f" || printControl == "F")
   {
-    charCounter = 0;
-    //classicFile << "" << endl;
-    cout << "" << endl;
-    cout << "Generation " << generationCount << ":" << endl;
-    for (int i = 0; i < countChar+1; i++) //For each item in the array.
+    if (strArray == strClassicArray)
     {
-      if (charCounter == lineLength)
+      return 0;
+    }
+    if (classicFile.is_open())
+    {
+      charCounter = 0;
+      output += "Generation ";
+      output += to_string(generationCount);
+      output += ":";
+      output += "\n";
+      for (int i = 0; i < countChar+1; i++)
       {
-        classicFile << unitbuf << "" << endl;
-        cout << "" << endl;
-        charCounter = 0;
-      }
+        if (charCounter == lineLength)
+        {
+          classicFile << "" << endl;
+          output += "\n";
+          charCounter = 0;
+        }
 
-      if (classicArray[i] == 'X' || classicArray[i] == 'x' || classicArray[i] == '-')
-      {
-        charCounter++;
-        classicFile << unitbuf << classicArray[i] << '\0';
-        cout << classicArray[i] << '\0';
+        if (classicArray[i] == 'X' || classicArray[i] == 'x' || classicArray[i] == '-')
+        {
+          charCounter++;
+          classicFile << classicArray[i] << '\0';
+          output += classicArray[i];
 
+        }
       }
     }
+    classicFile.flush();
+    classicFile.close();
+    ofstream outputFile (outputFileName);
+    outputFile << output;
+    outputFile.flush();
+    outputFile.close();
+    readFile("classicMode.txt");
+    ClassicMode(printControl, outputFileName);
   }
-  classicFile.flush();
-  classicFile.close();
-  readFile("classicMode.txt");
-  ClassicMode();
-  return 0;
-}
 
-/*int GameLife::ClassicModeRepeat()
-{
-  char* arrayC = &classicArray[0];
-
-  char classicArrayC[countChar] = { '\0' };
-
-  for (int i = 0; i < countChar; i++) //For each item in the array.
+  if (printControl == "P" || printControl == "p")
   {
-    numNeighbors = 0;
+    if (strArray == strClassicArray)
+    {
+      cout << "The simulation is now stable. Please press 'enter'/'return' to exit." << endl;
+      cin.ignore();
+      return 0;
+    }
+    if (classicFile.is_open())
+    {
+      charCounter = 0;
+      cout << "" << endl;
+      cout << "Generation " << generationCount << ":" << endl;
+      for (int i = 0; i < countChar+1; i++)
+      {
+        if (charCounter == lineLength)
+        {
+          classicFile << "" << endl;
+          cout << "" << endl;
+          charCounter = 0;
+        }
 
-    //top left neighbor
-    if (arrayC[i-lineLength-3] == '~' || arrayC[i-lineLength-3] == '-')
-    {}
-    if (arrayC[i-lineLength-3] == 'x' || arrayC[i-lineLength-3] == 'X')
-    {
-      numNeighbors++;
-    }
-    //top neighbor
-    if (arrayC[i-lineLength-2] == '~' || arrayC[i-lineLength-2] == '-')
-    {}
-    if (arrayC[i-lineLength-2] == 'x' || arrayC[i-lineLength-2] == 'X')
-    {
-      numNeighbors++;
-    }
-    //top right neighbor
-    if (arrayC[i-lineLength-1] == '~' || arrayC[i-lineLength-1] == '-')
-    {}
-    if (arrayC[i-lineLength-1] == 'x' || arrayC[i-lineLength-1] == 'X')
-    {
-      numNeighbors++;
-    }
-    //left neighbor
-    if (arrayC[i-1] == '~' || arrayC[i-1] == '-')
-    {}
-    if (arrayC[i-1] == 'x' || arrayC[i-1] == 'X')
-    {
-      numNeighbors++;
-    }
-    //right neighbor
-    if (arrayC[i+1] == '~' || arrayC[i+1] == '-')
-    {}
-    if (arrayC[i+1] == 'x' || arrayC[i+1] == 'X')
-    {
-      numNeighbors++;
-    }
-    //bottom left neighbor
-    if (arrayC[i+lineLength+1] == '~' || arrayC[i+lineLength+1] == '-')
-    {}
-    if (arrayC[i+lineLength+1] == 'x' || arrayC[i+lineLength+1] == 'X')
-    {
-      numNeighbors++;
-    }
-    //bottom neighbor
-    if (arrayC[i+lineLength+2] == '~' || arrayC[i+lineLength+2] == '-')
-    {}
-    if (arrayC[i+lineLength+2] == 'x' || arrayC[i+lineLength+2] == 'X')
-    {
-      numNeighbors++;
-    }
-    //bottom right neighbor
-    if (arrayC[i+lineLength+3] == '~' || arrayC[i+lineLength+3] == '-')
-    {}
-    if (arrayC[i+lineLength+3] == 'x' || arrayC[i+lineLength+3] == 'X')
-    {
-      numNeighbors++;
-    }
-
-    if (arrayC[i] == '-')
-    {
-      if (numNeighbors == 3)
-      {
-        classicArrayC[i] = 'X';
-      }
-      else
-      {
-        classicArrayC[i] = '-';
+        if (classicArray[i] == 'X' || classicArray[i] == 'x' || classicArray[i] == '-')
+        {
+          charCounter++;
+          classicFile << classicArray[i] << '\0';
+          cout << classicArray[i] << '\0';
+        }
       }
     }
-    if (arrayC[i] == 'X' || arrayC[i] == 'x')
-    {
-      if (numNeighbors <= 1)
-      {
-        classicArrayC[i] = '-';
-      }
-      if (numNeighbors == 2)
-      {
-        classicArrayC[i] = 'X';
-      }
-      if (numNeighbors == 3)
-      {
-        classicArrayC[i] = 'X';
-      }
-      if (numNeighbors >= 4)
-      {
-        classicArrayC[i] = '-';
-      }
-    }
-    if (arrayC[i] == '~')
-    {
-      classicArrayC[i] = '~';
-    }
-
-    //cout << array[i] << ' ';
-    //cout << "neighbors: " << numNeighbors << endl;
+    sleep(2);
+    classicFile.flush();
+    classicFile.close();
+    readFile("classicMode.txt");
+    ClassicMode(printControl, outputFileName);
   }
 
-  //for (int i = 0; i < countChar+1; i++) //For each item in the array.
-  //{
-    cout << classicArrayC[0] << ' ';
-  //}
   return 0;
-}*/
+};
 
-int GameLife::DoughNutMode()
+//Runs doughnut boundary mode for each of the three mediums depending on user input.
+int GameLife::DoughNutMode(string printControl, string outputFileName)
 {
   generationCount++;
-  ofstream doughnutFile ("doughnutMode.txt"); //Writes to/creates new file named
-                                         // classicMode.txt.
+  ofstream doughnutFile ("doughnutMode.txt");
+
   char* array = &vectorGrid[0];
   char doughnutArray[countChar] = { '\0' };
-  //char fixArray[countChar] = { '\0' };
   string fixArray1(array);
   fixArray1.erase(remove(fixArray1.begin(), fixArray1.end(), '~'), fixArray1.end());
-  //cout << fixArray1 << endl;
 
   int fixArray1Length = fixArray1.length();
   int fixArray1Rows = fixArray1Length/lineLength;
-  //cout << fixArray1Length << endl;
-  //cout << fixArray1Rows << endl;
 
   string fixArray2 = fixArray1;
   if (fixArray1[fixArray1Length-1] == 'x' || fixArray1[fixArray1Length-1] == 'X')
@@ -463,8 +443,7 @@ int GameLife::DoughNutMode()
   {
     fixArray2.insert(0, 1, 'L');
   }
-//cout << fixArray2 << endl;
-  for (int i = fixArray1Length-1; i > fixArray1Length-lineLength-1; i--) //For each item in the array.
+  for (int i = fixArray1Length-1; i > fixArray1Length-lineLength-1; i--)
   {
     if (fixArray1[i] == 'x' || fixArray1[i] == 'X')
     {
@@ -475,7 +454,6 @@ int GameLife::DoughNutMode()
       fixArray2.insert(1, 1, 'L');
     }
   }
-  //cout << fixArray2 << endl;
 
   if (fixArray1[fixArray1Length-lineLength-1] == 'x' || fixArray1[fixArray1Length-lineLength-1] == 'X')
   {
@@ -486,12 +464,8 @@ int GameLife::DoughNutMode()
     fixArray2.insert(lineLength+1, 1, 'L');
   }
 
-//cout << fixArray2 << endl;
-
-  for (int i = 1; i < fixArray1Rows+1; i++) //For each item in the array.
+  for (int i = 1; i < fixArray1Rows+1; i++)
   {
-    //cout << "1" << fixArray2[i*(lineLength+2)] << endl;
-    //cout << "2" << fixArray1[i*lineLength-1] << endl;
     if (fixArray1[i*lineLength-1] == 'x' || fixArray1[i*lineLength-1] == 'X')
     {
       fixArray2.insert(i*(lineLength+2), 1, 'W');
@@ -508,7 +482,6 @@ int GameLife::DoughNutMode()
     {
       fixArray2.insert(i*(lineLength+2)+lineLength+1, 1, 'L');
     }
-    //cout << fixArray2 << endl;
   }
 
   if (fixArray1[lineLength-1] == 'x' || fixArray1[lineLength-1] == 'X')
@@ -541,24 +514,7 @@ int GameLife::DoughNutMode()
     fixArray2.insert(fixArray2.end(), 1, 'L');
   }
 
-  //for (char part : tildaRemoval)
-  //{
-
-  //}
-
-  /*for (int i = 0; i < countChar; i++) //For each item in the array.
-  {
-    if (array[i] == '~')
-    {}
-    else
-    {
-      fixArray[i] = array[i];
-    }
-  }*/
-
-  //cout << fixArray2 << endl;
-
-  for (int i = 0; i < countChar; i++) //For each item in the array.
+  for (int i = 0; i < countChar; i++)
   {
     numNeighbors = 0;
 
@@ -653,76 +609,141 @@ int GameLife::DoughNutMode()
     {
       doughnutArray[i] = '~';
     }
-
-    //cout << array[i] << ' ';
-    //cout << "neighbors: " << numNeighbors << endl;
   }
-
-  /*for (int i = 0; i < countChar+1; i++) //For each item in the array.
-  {
-    cout << doughnutArray[i] << ' ';
-  }
-  cout << "" << endl;*/
 
   string strArray = array;
   string strdoughnutArray = doughnutArray;
 
-  //cout << strArray << endl;
-  //cout << strdoughnutArray << endl;
-
-  if (strArray == strdoughnutArray)
+  if (printControl == "E" || printControl == "e")
   {
-    cout << "The simulation is now stable. Please press 'enter'/'return' to exit." << endl;
-    cin.ignore();
-    return 0;
-  }
-  if (doughnutFile.is_open()) //If the new file created is open.
-  {
-    charCounter = 0;
-    //classicFile << "" << endl;
-
-    cout << "Generation " << generationCount << ":" << endl;//printing wrong
-    cout << "" << endl;
-    for (int i = 0; i < countChar+1; i++) //For each item in the array.
+    if (strArray == strdoughnutArray)
     {
-      if (charCounter == lineLength)
+      cout << "The simulation is now stable. Please press 'enter'/'return' to exit." << endl;
+      cin.ignore();
+      return 0;
+    }
+    if (doughnutFile.is_open())
+    {
+      charCounter = 0;
+      cout << "Generation " << generationCount << ":" << endl;
+      cout << "" << endl;
+      for (int i = 0; i < countChar+1; i++)
       {
-        doughnutFile << "" << endl;
-        cout << "" << endl;
-        charCounter = 0;
-      }
+        if (charCounter == lineLength)
+        {
+          doughnutFile << "" << endl;
+          cout << "" << endl;
+          charCounter = 0;
+        }
 
-      if (doughnutArray[i] == 'X' || doughnutArray[i] == 'x' || doughnutArray[i] == '-')
-      {
-        doughnutFile << doughnutArray[i] << '\0';
-        charCounter++;
-        cout << doughnutArray[i] << '\0';
+        if (doughnutArray[i] == 'X' || doughnutArray[i] == 'x' || doughnutArray[i] == '-')
+        {
+          doughnutFile << doughnutArray[i] << '\0';
+          charCounter++;
+          cout << doughnutArray[i] << '\0';
 
+        }
       }
     }
+    cin.ignore();
+    doughnutFile.flush();
+    doughnutFile.close();
+    readFile("doughnutMode.txt");
+    DoughNutMode(printControl, outputFileName);
   }
-  doughnutFile.close();
-  readFile("doughnutMode.txt");
-  DoughNutMode();
-  return 0;
-}
 
-int GameLife::MirrorMode()
+  if (printControl == "f" || printControl == "F")
+  {
+    if (strArray == strdoughnutArray)
+    {
+      return 0;
+    }
+    if (doughnutFile.is_open())
+    {
+      charCounter = 0;
+      output += "Generation ";
+      output += to_string(generationCount);
+      output += ":";
+      output += "\n";
+      for (int i = 0; i < countChar+1; i++)
+      {
+        if (charCounter == lineLength)
+        {
+          doughnutFile << "" << endl;
+          output += "\n";
+          charCounter = 0;
+        }
+
+        if (doughnutArray[i] == 'X' || doughnutArray[i] == 'x' || doughnutArray[i] == '-')
+        {
+          charCounter++;
+          doughnutFile << doughnutArray[i] << '\0';
+          output += doughnutArray[i];
+        }
+      }
+    }
+    doughnutFile.flush();
+    doughnutFile.close();
+    ofstream outputFile (outputFileName);
+    outputFile << output;
+    outputFile.flush();
+    outputFile.close();
+    readFile("doughnutMode.txt");
+    DoughNutMode(printControl, outputFileName);
+  }
+
+  if (printControl == "P" || printControl == "p")
+  {
+    if (strArray == strdoughnutArray)
+    {
+      cout << "The simulation is now stable. Please press 'enter'/'return' to exit." << endl;
+      cin.ignore();
+      return 0;
+    }
+    if (doughnutFile.is_open())
+    {
+      charCounter = 0;
+      cout << "Generation " << generationCount << ":" << endl;
+      cout << "" << endl;
+      for (int i = 0; i < countChar+1; i++)
+      {
+        if (charCounter == lineLength)
+        {
+          doughnutFile << "" << endl;
+          cout << "" << endl;
+          charCounter = 0;
+        }
+
+        if (doughnutArray[i] == 'X' || doughnutArray[i] == 'x' || doughnutArray[i] == '-')
+        {
+          doughnutFile << doughnutArray[i] << '\0';
+          charCounter++;
+          cout << doughnutArray[i] << '\0';
+
+        }
+      }
+    }
+    sleep(2);
+    doughnutFile.flush();
+    doughnutFile.close();
+    readFile("doughnutMode.txt");
+    DoughNutMode(printControl, outputFileName);
+  }
+  return 0;
+};
+
+//Runs mirror boundary mode for each of the three mediums depending on user input.
+int GameLife::MirrorMode(string printControl, string outputFileName)
 {
   generationCount++;
-  ofstream mirrorFile ("mirrorMode.txt"); //Writes to/creates new file named
-                                         // classicMode.txt.
+  ofstream mirrorFile ("mirrorMode.txt");
   char* array = &vectorGrid[0];
   char mirrorArray[countChar] = { '\0' };
-  //char fixArray[countChar] = { '\0' };
   string fixArray1(array);
   fixArray1.erase(remove(fixArray1.begin(), fixArray1.end(), '~'), fixArray1.end());
-  //cout << fixArray1 << endl;
 
   int fixArray1Length = fixArray1.length();
   int fixArray1Rows = fixArray1Length/lineLength;
-  //cout << fixArray1Length << endl;
-  //cout << fixArray1Rows << endl;
 
   string fixArray2 = fixArray1;
   if (fixArray1[0] == 'x' || fixArray1[0] == 'X')
@@ -733,7 +754,6 @@ int GameLife::MirrorMode()
   {
     fixArray2.insert(0, 1, 'L');
   }
-  //cout << fixArray2 << endl;
 
   for (int i = lineLength-1; i > -1; i--)
   {
@@ -746,7 +766,6 @@ int GameLife::MirrorMode()
       fixArray2.insert(1, 1, 'L');
     }
   }
-  //cout << fixArray2 << endl;
 
   if (fixArray1[lineLength-1] == 'x' || fixArray1[lineLength-1] == 'X')
   {
@@ -757,12 +776,8 @@ int GameLife::MirrorMode()
     fixArray2.insert(lineLength+1, 1, 'L');
   }
 
-  //cout << fixArray2 << endl;
-
-  for (int i = 1; i < fixArray1Rows+1; i++) //For each item in the array.
+  for (int i = 1; i < fixArray1Rows+1; i++)
   {
-    //cout << "1" << fixArray2[i*(lineLength+2)] << endl;
-    //cout << "2" << fixArray1[i*lineLength-1] << endl;
     if (fixArray1[i*lineLength-lineLength] == 'x' || fixArray1[i*lineLength-lineLength] == 'X')
     {
       fixArray2.insert(i*(lineLength+2), 1, 'W');
@@ -779,7 +794,6 @@ int GameLife::MirrorMode()
     {
       fixArray2.insert(i*(lineLength+2)+lineLength+1, 1, 'L');
     }
-    //cout << fixArray2 << endl;
   }
 
   if (fixArray1[fixArray1Length-lineLength-1] == 'x' || fixArray1[fixArray1Length-lineLength-1] == 'X')
@@ -791,7 +805,7 @@ int GameLife::MirrorMode()
     fixArray2.insert(fixArray2.end(), 1, 'L');
   }
 
-  for (int i = fixArray1Length-lineLength; i < fixArray1Length; i++) //For each item in the array.
+  for (int i = fixArray1Length-lineLength; i < fixArray1Length; i++)
   {
     if (fixArray1[i] == 'x' || fixArray1[i] == 'X')
     {
@@ -802,12 +816,6 @@ int GameLife::MirrorMode()
       fixArray2.insert(fixArray2.end(), 1, 'L');
     }
   }
-  //LLLLWLLWWL---X--XWL-X--X--LL-----XXWWX-X-X--LL-----XXWLWWLLLLL
-  //LLLLWLLWWL---X--XWL-X--X--LL-----XXWWX-X-X--LL-----XXWLLLLLLLW
-  //LLLLWLLWWL---X--XWL-X--X--LL-----XXWWX-X-X--LL-----XXWLLLLLLW
-  //LLLLWLLWWL---X--XWL-X--X--LL-----XXWWX-X-X--LL-----XXWLLLLLLWW
-//cout << fixArray2 << endl;
-//cout << fixArray1[fixArray1Length-1] << endl;
   if (fixArray1[fixArray1Length-1] == 'x' || fixArray1[fixArray1Length-1] == 'X')
   {
     fixArray2.insert(fixArray2.end(), 1, 'W');
@@ -816,25 +824,8 @@ int GameLife::MirrorMode()
   {
     fixArray2.insert(fixArray2.end(), 1, 'L');
   }
-//cout << fixArray2 << endl;
-  //for (char part : tildaRemoval)
-  //{
 
-  //}
-
-  /*for (int i = 0; i < countChar; i++) //For each item in the array.
-  {
-    if (array[i] == '~')
-    {}
-    else
-    {
-      fixArray[i] = array[i];
-    }
-  }*/
-
-  //cout << fixArray2 << endl;
-
-  for (int i = 0; i < countChar; i++) //For each item in the array.
+  for (int i = 0; i < countChar; i++)
   {
     numNeighbors = 0;
 
@@ -929,71 +920,129 @@ int GameLife::MirrorMode()
     {
       mirrorArray[i] = '~';
     }
-
-    //cout << array[i] << ' ';
-    //cout << "neighbors: " << numNeighbors << endl;
   }
-
-  /*for (int i = 0; i < countChar+1; i++) //For each item in the array.
-  {
-    cout << mirrorArray[i] << ' ';
-  }
-
-  string strArray = array;
-  string strdoughnutArray = doughnutArray;
-
-  //cout << strArray << endl;
-  //cout << strdoughnutArray << endl;
-
-  if (strArray == strdoughnutArray)
-  {
-  cout << "" << endl;*/
 
   string strArray = array;
   string strmirrorArray = mirrorArray;
 
-  //cout << strArray << endl;
-  //cout << strmirrorArray << endl;
-
-  if (strArray == strmirrorArray)
+  if (printControl == "E" || printControl == "e")
   {
-    cout << "The simulation is now stable. Please press 'enter'/'return' to exit." << endl;
-    cin.ignore();
-    return 0;
-  }
-  if (mirrorFile.is_open()) //If the new file created is open.
-  {
-    charCounter = 0;
-    //classicFile << "" << endl;
-
-    cout << "Generation " << generationCount << ":" << endl;//printing wrong
-    cout << "" << endl;
-    for (int i = 0; i < countChar+1; i++) //For each item in the array.
+    if (strArray == strmirrorArray)
     {
-      if (charCounter == lineLength)
-      {
-        mirrorFile << "" << endl;
-        cout << "" << endl;
-        charCounter = 0;
-      }
+      cout << "The simulation is now stable. Please press 'enter'/'return' to exit." << endl;
+      cin.ignore();
+      return 0;
+    }
+    if (mirrorFile.is_open())
+    {
+      charCounter = 0;
 
-      if (mirrorArray[i] == 'X' || mirrorArray[i] == 'x' || mirrorArray[i] == '-')
+      cout << "Generation " << generationCount << ":" << endl;
+      cout << "" << endl;
+      for (int i = 0; i < countChar+1; i++)
       {
-        mirrorFile << mirrorArray[i] << '\0';
-        charCounter++;
-        cout << mirrorArray[i] << '\0';
+        if (charCounter == lineLength)
+        {
+          mirrorFile << "" << endl;
+          cout << "" << endl;
+          charCounter = 0;
+        }
 
+        if (mirrorArray[i] == 'X' || mirrorArray[i] == 'x' || mirrorArray[i] == '-')
+        {
+          mirrorFile << mirrorArray[i] << '\0';
+          charCounter++;
+          cout << mirrorArray[i] << '\0';
+
+        }
       }
     }
-  }
-  if (strArray == strmirrorArray)
-  {
-    cout << "The simulation is now stable. Please press 'enter'/'return' to exit." << endl;
     cin.ignore();
-    return 0;
+    mirrorFile.flush();
+    mirrorFile.close();
+    readFile("mirrorMode.txt");
+    MirrorMode(printControl, outputFileName);
   }
-  mirrorFile.close();
-  readFile("mirrorMode.txt");
-  MirrorMode();
+
+  if (printControl == "f" || printControl == "F")
+  {
+    if (strArray == strmirrorArray)
+    {
+      return 0;
+    }
+    if (mirrorFile.is_open())
+    {
+      charCounter = 0;
+      output += "Generation ";
+      output += to_string(generationCount);
+      output += ":";
+      output += "\n";
+      for (int i = 0; i < countChar+1; i++)
+      {
+        if (charCounter == lineLength)
+        {
+          mirrorFile << "" << endl;
+          output += "\n";
+          charCounter = 0;
+        }
+
+        if (mirrorArray[i] == 'X' || mirrorArray[i] == 'x' || mirrorArray[i] == '-')
+        {
+          charCounter++;
+          mirrorFile << mirrorArray[i] << '\0';
+          output += mirrorArray[i];
+
+        }
+      }
+    }
+    mirrorFile.flush();
+    mirrorFile.close();
+    ofstream outputFile (outputFileName);
+    outputFile << output;
+    outputFile.flush();
+    outputFile.close();
+    readFile("mirrorMode.txt");
+    MirrorMode(printControl, outputFileName);
+  }
+
+  if (printControl == "P" || printControl == "p")
+  {
+    if (strArray == strmirrorArray)
+    {
+      cout << "The simulation is now stable. Please press 'enter'/'return' to exit." << endl;
+      cin.ignore();
+      return 0;
+    }
+    if (mirrorFile.is_open())
+    {
+      charCounter = 0;
+
+      cout << "Generation " << generationCount << ":" << endl;
+      cout << "" << endl;
+      for (int i = 0; i < countChar+1; i++)
+      {
+        if (charCounter == lineLength)
+        {
+          mirrorFile << "" << endl;
+          cout << "" << endl;
+          charCounter = 0;
+        }
+
+        if (mirrorArray[i] == 'X' || mirrorArray[i] == 'x' || mirrorArray[i] == '-')
+        {
+          mirrorFile << mirrorArray[i] << '\0';
+          charCounter++;
+          cout << mirrorArray[i] << '\0';
+
+        }
+      }
+    }
+    sleep(2);
+    mirrorFile.flush();
+    mirrorFile.close();
+    readFile("mirrorMode.txt");
+    MirrorMode(printControl, outputFileName);
+  }
+
   return 0;
-}
+};
